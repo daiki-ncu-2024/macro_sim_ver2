@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>財務省になろう！ 〜 補佐官ミライと描く日本の明日 〜</title>
+    
+    <!-- 1. 基本ライブラリの読み込み -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- 2. Rechartsの動作に必要な依存関係の定義 -->
+    <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
+    <script>
+        // グローバルスコープの固定
+        window.React = React;
+        window.ReactDOM = ReactDOM;
+        window.PropTypes = PropTypes;
+    </script>
+
+    <!-- 3. グラフ・アイコン・スタイルの読み込み -->
+    <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- 4. カスタムスタイルの読み込み -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-50 text-slate-900">
+    <div id="root"></div>
+
+    <!-- 5. アプリケーションロジックの読み込み -->
+    <script type="text/babel" src="script.js"></script>
+</body>
+</html>
