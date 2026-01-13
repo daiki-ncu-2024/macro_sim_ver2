@@ -153,22 +153,22 @@ const App = () => {
                         </div>
                         <p className="text-xs text-slate-500 font-bold italic">〜 補佐官ミライと描く日本の明日 〜</p>
                     </div>
-                    <div className="text-right">
-                        <div className="text-xs font-bold text-slate-400">SESSION</div>
-                        <div className="text-2xl font-black text-blue-600">{current.turn}/16</div>
-                    </div>
                 </header>
 
                 <div className="space-y-6">
                     <div className="flex gap-4">
-                        <div className="w-40 h-40 bg-white p-3 rounded-2xl shadow-lg text-center border-b-8 border-pink-500 flex flex-col justify-center flex-shrink-0">
+                        <div className="w-40 h-32 bg-white p-3 rounded-2xl shadow-lg text-center border-b-8 border-pink-500 flex flex-col justify-center flex-shrink-0">
                             <div className="text-sm font-bold text-slate-400 uppercase">国民支持率</div>
                             <div className="text-5xl font-black text-pink-600 my-1">{current.support.toFixed(1)}<span className="text-2xl">%</span></div>
                         </div>
-                        <div className="flex-1 flex flex-col justify-between space-y-2">
+                        <div className="w-48 h-32 flex flex-col justify-around">
                             <MiniStat label="実質GDP" value={`${(current.Y / 1000).toFixed(1)}T`} color="blue" />
                             <MiniStat label="失業率" value={`${(current.unemployment * 100).toFixed(2)}%`} color="emerald" />
                             <MiniStat label="物価指数" value={current.P.toFixed(1)} color="purple" />
+                        </div>
+                        <div className="w-32 h-32 bg-white p-3 rounded-2xl shadow-lg text-center border-b-8 border-blue-500 flex flex-col justify-center">
+                            <div className="text-xs font-bold text-slate-400">SESSION</div>
+                            <div className="text-3xl font-black text-blue-600">{current.turn}/16</div>
                         </div>
                     </div>
 
