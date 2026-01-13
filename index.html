@@ -16,6 +16,35 @@
         .font-m-plus {
             font-family: 'M PLUS Rounded 1c', sans-serif;
         }
+        /* Custom styling for range input track to show 0 point */
+        input[type="range"].zero-point-slider::-webkit-slider-runnable-track {
+            background: linear-gradient(to right, #ef4444 0%, #ef4444 49.5%, #cbd5e1 49.5%, #cbd5e1 50.5%, #22c55e 50.5%, #22c55e 100%);
+            border-radius: 9999px; /* To match Tailwind's rounded-full */
+        }
+        input[type="range"].zero-point-slider::-moz-range-track {
+            background: linear-gradient(to right, #ef4444 0%, #ef4444 49.5%, #cbd5e1 49.5%, #cbd5e1 50.5%, #22c55e 50.5%, #22c55e 100%);
+            border-radius: 9999px;
+        }
+        /* For the thumb */
+        input[type="range"].zero-point-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px; /* Tailwind w-4 */
+            height: 16px; /* Tailwind h-4 */
+            border-radius: 50%;
+            background: #facc15; /* Tailwind accent-yellow-400 */
+            cursor: pointer;
+            margin-top: -5px; /* Adjust to center vertically */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        input[type="range"].zero-point-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #facc15;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800">

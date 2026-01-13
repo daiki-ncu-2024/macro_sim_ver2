@@ -56,41 +56,52 @@ const calcSupport = (growth, inflation, unemployment, prev_support) => {
     return Math.min(100, Math.max(0, new_support));
 };
 
-// --- UIコンポーネント ---
-const MiniStat = ({ label, value, color }) => {
-    const colors = {
-        blue: "border-blue-500",
-        emerald: "border-emerald-500",
-        purple: "border-purple-500"
-    };
+// --- New/Modified UI Components ---
+
+// IndicatorCard component for GDP, Unemployment, Price
+const IndicatorCard = ({ label, value, change }) => {
+    const changeColor = change > 0 ? "text-green-500" : change < 0 ? "text-red-500" : "text-slate-500";
+    const changeIcon = change > 0 ? "▲" : change < 0 ? "▼" : "";
     return (
-        <div className={`p-2 rounded-lg bg-white shadow-sm border-l-8 ${colors[color]}`}>
-            <div className="flex justify-between items-baseline">
-                <span className="text-xs font-bold text-slate-500">{label}</span>
+        <div className="flex-1 bg-white p-2 rounded-lg shadow-sm border-b-4 border-slate-200">
+            <div className="text-xs font-bold text-slate-500">{label}</div>
+            <div className="flex justify-between items-baseline mt-1">
                 <span className="text-xl font-black text-slate-800">{value}</span>
+                {change !== undefined && (
+                    <span className={`text-xs font-bold ${changeColor}`}>
+                        {changeIcon}{Math.abs(change).toFixed(1)}%
+                    </span>
+                )}
             </div>
         </div>
     );
 };
 
-const ControlGroup = ({ label, value, min, max, step, onChange, displayValue }) => (
-    <div className="space-y-1 flex-1">
-        <div className="flex justify-between text-xs font-bold uppercase tracking-tighter">
-            <span>{label}</span>
-            <span className="text-yellow-300">{displayValue}</span>
-        </div>
+// ControlGroup component (styling adjusted for thicker slider)
+const ControlGroup = ({ iconName, label, value, min, max, step, onChange, displayValue }) => (
+    <div className="flex items-center gap-2">
+        <Icon name={iconName} className="w-5 h-5 text-white" />
+        <span className="text-xs font-bold uppercase text-white w-12 flex-shrink-0">{label}</span>
         <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(parseFloat(e.target.value))}
-            className="w-full h-2 bg-blue-900 rounded-lg appearance-none cursor-pointer accent-yellow-400" />
+            className="flex-1 h-3 bg-blue-900 rounded-lg appearance-none cursor-pointer accent-yellow-400 zero-point-slider" /> {/* h-3 for thicker */}
+        <span className="text-yellow-300 font-bold w-20 text-right">{displayValue}</span>
     </div>
 );
 
 const App = () => {
     const [history, setHistory] = useState([INITIAL_STATE]);
-    const [controls, setControls] = useState({ tau: 0, rDelta: 0, gDelta: 0 });
+    const [controls, setControls] = useState({ tau: INITIAL_STATE.tau, rDelta: 0, gDelta: 0 });
     const [news, setNews] = useState(["次官、本日からよろしくお願いします！まずは予算教書を確認しましょう。"]);
     const [isGameOver, setIsGameOver] = useState(false);
+    const [activeChartTab, setActiveChartTab] = useState('GDP'); // New state for chart tab
 
     const current = history[history.length - 1];
+    const prev = history.length > 1 ? history[history.length - 2] : null;
+
+    // Calculate changes for indicators
+    const gdpChange = prev ? ((current.Y - prev.Y) / prev.Y) * 100 : 0;
+    const unemploymentChange = prev ? ((current.unemployment - prev.unemployment) / prev.unemployment) * 100 : 0;
+    const priceChange = prev ? ((current.P - prev.P) / prev.P) * 100 : 0;
 
     const handleStep = () => {
         if (isGameOver) return;
@@ -143,99 +154,118 @@ const App = () => {
     };
 
     return (
-        <div className="bg-slate-100 text-slate-900 font-sans">
-            <main className="max-w-lg mx-auto p-4 pb-56">
-                <header className="flex justify-between items-end mb-6 border-b-4 border-blue-500 pb-4">
-                    <div>
-                        <div className="flex items-center gap-2 mb-1">
-                            <Icon name="Landmark" className="text-blue-600 w-7 h-7" />
-                            <h1 className="text-2xl font-black text-slate-800 tracking-tight">財務省になろう！</h1>
-                        </div>
-                        <p className="text-xs text-slate-500 font-bold italic">〜 補佐官ミライと描く日本の明日 〜</p>
-                    </div>
-                </header>
+        <div className="bg-slate-100 text-slate-900 font-sans flex flex-col h-screen max-w-lg mx-auto">
+            {/* Header */}
+            <header className="flex items-center justify-between p-3 bg-white shadow-md">
+                <Icon name="Menu" className="w-6 h-6 text-slate-600" />
+                <div className="flex flex-col items-center">
+                    <div className="text-xs font-bold text-slate-400 uppercase">国民支持率</div>
+                    <div className="text-3xl font-black text-pink-600">{current.support.toFixed(1)}<span className="text-xl">%</span></div>
+                </div>
+                <div className="text-right">
+                    <div className="text-xs font-bold text-slate-400">SESSION</div>
+                    <div className="text-xl font-black text-blue-600">{current.turn}/16</div>
+                </div>
+            </header>
 
-                <div className="space-y-6">
-                    <div className="flex gap-4">
-                        <div className="w-40 h-32 bg-white p-3 rounded-2xl shadow-lg text-center border-b-8 border-pink-500 flex flex-col justify-center flex-shrink-0">
-                            <div className="text-sm font-bold text-slate-400 uppercase">国民支持率</div>
-                            <div className="text-5xl font-black text-pink-600 my-1">{current.support.toFixed(1)}<span className="text-2xl">%</span></div>
-                        </div>
-                        <div className="w-48 h-32 flex flex-col justify-around">
-                            <MiniStat label="実質GDP" value={`${(current.Y / 1000).toFixed(1)}T`} color="blue" />
-                            <MiniStat label="失業率" value={`${(current.unemployment * 100).toFixed(2)}%`} color="emerald" />
-                            <MiniStat label="物価指数" value={current.P.toFixed(1)} color="purple" />
-                        </div>
-                        <div className="w-32 h-32 bg-white p-3 rounded-2xl shadow-lg text-center border-b-8 border-blue-500 flex flex-col justify-center">
-                            <div className="text-xs font-bold text-slate-400">SESSION</div>
-                            <div className="text-3xl font-black text-blue-600">{current.turn}/16</div>
-                        </div>
-                    </div>
+            {/* Indicators */}
+            <div className="flex justify-around gap-2 p-3 bg-slate-50 shadow-inner">
+                <IndicatorCard label="GDP" value={`${(current.Y / 1000).toFixed(1)}T`} change={gdpChange} />
+                <IndicatorCard label="失業率" value={`${(current.unemployment * 100).toFixed(2)}%`} change={unemploymentChange} />
+                <IndicatorCard label="物価" value={current.P.toFixed(1)} change={priceChange} />
+            </div>
 
-                    <div className="bg-white p-4 rounded-2xl shadow-lg border-2 border-slate-200">
-                        <h3 className="text-base font-bold mb-2 flex items-center gap-2"><Icon name="Activity" className="text-blue-500 w-5 h-5" /> 統合経済指標</h3>
-                        <div className="h-60">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <ComposedChart data={history}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                                    <XAxis dataKey="date" tick={{fontSize: 10}} />
+            {/* Main Content Area (Chart + Character) */}
+            <main className="flex-1 flex flex-col p-3 overflow-hidden">
+                {/* Chart */}
+                <div className="bg-white p-3 rounded-lg shadow-md flex-1 flex flex-col min-h-0">
+                    {/* Chart Tabs */}
+                    <div className="flex justify-around border-b border-slate-200 mb-3">
+                        {['GDP', '失業率', '物価'].map(tab => (
+                            <button key={tab} onClick={() => setActiveChartTab(tab)}
+                                className={`py-2 px-4 text-sm font-bold ${activeChartTab === tab ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-500'}`}>
+                                {tab}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="flex-1 min-h-0">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <ComposedChart data={history}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                                <XAxis dataKey="date" tick={{fontSize: 10}} interval="preserveStartEnd" />
+                                {/* Y-axis for GDP */}
+                                {activeChartTab === 'GDP' && (
                                     <YAxis yAxisId="left" orientation="left" stroke="#3b82f6" tick={{fontSize: 10}} domain={['dataMin - 10000', 'dataMax + 10000']} />
-                                    <YAxis yAxisId="right" orientation="right" stroke="#10b981" tick={{fontSize: 10}} domain={[0, 0.1]} /> {/* 失業率軸 */}
-                                    <YAxis yAxisId="right2" orientation="right" stroke="#a855f7" tick={{fontSize: 10}} domain={[90, 110]} offset={50} /> {/* 物価指数軸 */}
-                                    <Tooltip formatter={(value, name) => {
-                                        if (name === 'Y') return [`${(value / 1000).toFixed(1)} T`, '実質GDP'];
-                                        if (name === 'unemployment') return [`${(value * 100).toFixed(2)} %`, '失業率'];
-                                        if (name === 'P') return [value.toFixed(1), '物価指数'];
-                                        return [value, name];
-                                    }} contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', padding: '8px'}} />
-                                    <Legend wrapperStyle={{fontSize: "10px"}} />
-                                    <defs><linearGradient id="colorY" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#3b82f6" stopOpacity={0.7}/><stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/></linearGradient></defs>
+                                )}
+                                {/* Y-axis for Unemployment */}
+                                {activeChartTab === '失業率' && (
+                                    <YAxis yAxisId="right" orientation="right" stroke="#10b981" tick={{fontSize: 10}} domain={[0, 0.1]} />
+                                )}
+                                {/* Y-axis for Price */}
+                                {activeChartTab === '物価' && (
+                                    <YAxis yAxisId="right2" orientation="right" stroke="#a855f7" tick={{fontSize: 10}} domain={[90, 110]} />
+                                )}
+                                <Tooltip formatter={(value, name) => {
+                                    if (name === 'Y') return [`${(value / 1000).toFixed(1)} T`, '実質GDP'];
+                                    if (name === 'unemployment') return [`${(value * 100).toFixed(2)} %`, '失業率'];
+                                    if (name === 'P') return [value.toFixed(1), '物価指数'];
+                                    return [value, name];
+                                }} contentStyle={{borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px', padding: '4px 8px'}} />
+                                <Legend wrapperStyle={{fontSize: "10px"}} iconSize={10} />
+                                <defs><linearGradient id="colorY" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#3b82f6" stopOpacity={0.7}/><stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/></linearGradient></defs>
+                                
+                                {activeChartTab === 'GDP' && (
                                     <Area name="実質GDP" type="monotone" dataKey="Y" stroke="#3b82f6" fill="url(#colorY)" strokeWidth={2} yAxisId="left" />
+                                )}
+                                {activeChartTab === '失業率' && (
                                     <Line name="失業率" type="monotone" dataKey="unemployment" stroke="#10b981" strokeWidth={2} yAxisId="right" dot={false} />
+                                )}
+                                {activeChartTab === '物価' && (
                                     <Line name="物価指数" type="monotone" dataKey="P" stroke="#a855f7" strokeWidth={2} yAxisId="right2" dot={false} />
-                                </ComposedChart>
-                            </ResponsiveContainer>
-                        </div>
+                                )}
+                            </ComposedChart>
+                        </ResponsiveContainer>
                     </div>
-                    
-                    <div className="bg-white p-4 rounded-2xl shadow-lg border-2 border-slate-200">
-                        <h4 className="text-base font-bold mb-2 flex items-center gap-2 text-slate-600"><Icon name="Newspaper" className="w-5 h-5" /> 官邸広報</h4>
-                        <div className="space-y-2 text-xs">
-                            {news.map((n, i) => (
-                                <p key={i} className={`leading-relaxed ${i === 0 ? 'text-blue-600 font-semibold' : 'text-slate-500'}`}>• {n}</p>
-                            ))}
-                        </div>
+                </div>
+
+                {/* Character Area */}
+                <div className="flex items-end mt-4">
+                    <img src="hakase1_smile.png" alt="補佐官ミライ" className="w-20 h-20 rounded-full border-2 border-blue-400 shadow-md flex-shrink-0" />
+                    <div className="relative bg-blue-100 text-blue-800 p-3 rounded-lg rounded-bl-none shadow-md ml-3 flex-1">
+                        <p className="text-sm font-semibold">{news[0]}</p>
+                        <div className="absolute left-0 bottom-0 w-3 h-3 bg-blue-100 transform rotate-45 translate-x-1/2 translate-y-1/2"></div>
                     </div>
                 </div>
             </main>
 
-            <footer className="fixed bottom-0 left-0 right-0 bg-blue-700 text-white p-4 border-t-4 border-blue-500 shadow-lg z-10">
-                <div className="max-w-lg mx-auto">
-                    <div className="flex items-center gap-4">
-                        <div className="flex-1 space-y-3">
-                            <ControlGroup label="実効税率 (τ)" value={controls.tau} min={-0.25} max={0.25} step={0.005} displayValue={`${(controls.tau * 100).toFixed(1)}%`} onChange={(v) => setControls({...controls, tau: v})} />
-                            <ControlGroup label="政府支出増減 (G)" value={controls.gDelta} min={-10000} max={10000} step={500} displayValue={`${controls.gDelta > 0 ? '+' : ''}${controls.gDelta}億`} onChange={(v) => setControls({...controls, gDelta: v})} />
-                            <ControlGroup label="金利操作 (Δr)" value={controls.rDelta} min={-0.5} max={0.5} step={0.01} displayValue={`${controls.rDelta > 0 ? '+' : ''}${controls.rDelta}pt`} onChange={(v) => setControls({...controls, rDelta: v})} />
-                        </div>
-                        <button onClick={handleStep} disabled={isGameOver} className="w-28 h-28 bg-yellow-400 hover:bg-yellow-300 text-blue-900 font-black rounded-2xl text-lg shadow-lg transform active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center justify-center">
-                            <Icon name="Play" className="w-8 h-8" />
-                            <span>次の四半期へ</span>
-                        </button>
-                    </div>
+            {/* Controls */}
+            <div className="bg-blue-700 text-white p-3 shadow-lg">
+                <div className="space-y-3">
+                    <ControlGroup iconName="Scale" label="税率 (τ)" value={controls.tau} min={-0.25} max={0.25} step={0.005} displayValue={`${(controls.tau * 100).toFixed(1)}%`} onChange={(v) => setControls({...controls, tau: v})} />
+                    <ControlGroup iconName="Banknote" label="政府支出 (G)" value={controls.gDelta} min={-10000} max={10000} step={500} displayValue={`${controls.gDelta > 0 ? '+' : ''}${controls.gDelta}億`} onChange={(v) => setControls({...controls, gDelta: v})} />
+                    <ControlGroup iconName="TrendingUp" label="金利操作 (Δr)" value={controls.rDelta} min={-0.5} max={0.5} step={0.01} displayValue={`${controls.rDelta > 0 ? '+' : ''}${controls.rDelta}pt`} onChange={(v) => setControls({...controls, rDelta: v})} />
                 </div>
+            </div>
+
+            {/* Footer (Next Quarter Button) */}
+            <footer className="w-full">
+                <button onClick={handleStep} disabled={isGameOver}
+                    className="w-full bg-gradient-to-r from-blue-600 to-blue-800 text-white font-black py-4 text-xl shadow-lg transform active:scale-99 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                    次の四半期へ
+                </button>
             </footer>
 
             {isGameOver && (
-                <div className="fixed inset-0 bg-blue-900/90 backdrop-blur-md flex items-center justify-center z-50 p-4">
-                    <div className="bg-white p-8 rounded-[40px] max-w-sm w-full shadow-2xl text-center">
-                        <div className="text-6xl mb-4">🏆</div>
-                        <h2 className="text-3xl font-black mb-2 text-slate-800">任期満了！</h2>
-                        <p className="text-slate-500 mb-6 font-bold">あなたの政策で日本の未来が変わりました。</p>
-                        <div className="bg-slate-50 p-4 rounded-2xl mb-6">
+                <div className="fixed inset-0 bg-blue-900/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white p-6 rounded-2xl max-w-sm w-full shadow-2xl text-center border-4 border-yellow-400">
+                        <div className="text-5xl mb-2">🏆</div>
+                        <h2 className="text-2xl font-black mb-1 text-slate-800">任期満了！</h2>
+                        <p className="text-slate-500 mb-4 font-semibold">お疲れ様でした。あなたの政策結果です。</p>
+                        <div className="bg-slate-100 p-3 rounded-lg mb-4">
                             <div className="text-sm font-bold text-slate-400">最終支持率</div>
                             <div className="text-4xl font-black text-blue-600">{current.support.toFixed(1)}%</div>
                         </div>
-                        <button onClick={() => window.location.reload()} className="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg">もう一度挑戦する</button>
+                        <button onClick={() => window.location.reload()} className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg shadow-lg transition-all">もう一度挑戦する</button>
                     </div>
                 </div>
             )}
@@ -245,3 +275,4 @@ const App = () => {
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);
+
