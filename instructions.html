@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>操作説明 - 財務省になろう！</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+    <div class="max-w-2xl mx-auto p-4 md:p-8">
+        
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-blue-600">操作説明</h1>
+            <p class="text-slate-500 mt-1">ゲームの基本的なルール</p>
+        </header>
+
+        <main class="space-y-6">
+            <!-- ゲームの目標 -->
+            <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
+                <h2 class="text-xl font-bold flex items-center mb-3">
+                    <i data-lucide="flag" class="mr-3 text-blue-500"></i>
+                    ゲームの目標
+                </h2>
+                <p class="text-slate-600 leading-relaxed">
+                    あなたは日本の財政を担う財務次官です。<strong>16ターン（4年間）</strong>の任期中に、国民の支持を高く保ちながら、デフレを克服し、日本経済を成長させましょう！
+                </p>
+            </div>
+
+            <!-- 画面の見方 -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-bold flex items-center mb-4">
+                    <i data-lucide="layout-template" class="mr-3 text-slate-500"></i>
+                    画面の見方
+                </h2>
+                <ul class="space-y-3 text-slate-600">
+                    <li><strong>国民支持率:</strong> あなたの政策運営に対する国民の評価です。最も重要な指標となります。</li>
+                    <li><strong>経済指標 (GDP・失業率・物価):</strong> 現在の経済状況を示します。これらの指標を改善することが目標です。</li>
+                    <li><strong>統合経済指標グラフ:</strong> これまでの経済の推移を視覚的に確認できます。</li>
+                    <li><strong>官邸広報:</strong> 経済状況に応じたヒントやニュースが表示されます。</li>
+                    <li><strong>政策実行コマンド:</strong> 税率・政府支出・金利を操作して、次のターンに進みます。</li>
+                </ul>
+            </div>
+
+            <!-- 政策の効果 -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-bold flex items-center mb-4">
+                    <i data-lucide="sliders-horizontal" class="mr-3 text-slate-500"></i>
+                    政策の効果（ヒント）
+                </h2>
+                <ul class="space-y-3 text-slate-600 list-disc list-inside">
+                    <li><strong>税率:</strong> 税率を下げると、人々が使えるお金が増え、消費が活発になる傾向があります。（マイナスにすると給付金になります）</li>
+                    <li><strong>政府支出:</strong> 公共事業などにお金を使うことで、直接的にGDPを押し上げる効果があります。</li>
+                    <li><strong>金利:</strong> 金利を下げると、企業がお金を借りやすくなり、設備投資などが活発になる可能性があります。</li>
+                </ul>
+            </div>
+            
+            <!-- 経済モデルのヒント -->
+            <div class="bg-amber-50 border-amber-400 border-l-4 p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-bold flex items-center mb-3 text-amber-800">
+                    <i data-lucide="lightbulb" class="mr-3 text-amber-500"></i>
+                    経済モデルのヒント
+                </h2>
+                <p class="text-amber-700 leading-relaxed font-semibold">
+                    この世界では、何もしないと物価が下がり続ける「構造的なデフレ圧力」が存在します。あなたの政策で、適度なインフレ（2%が理想）と経済成長の両立を目指してください。
+                </p>
+            </div>
+
+            <!-- 勝利・敗北条件 -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-bold flex items-center mb-4">
+                    <i data-lucide="swords" class="mr-3 text-slate-500"></i>
+                    勝利・敗北条件
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="border-2 border-green-500 rounded-lg p-4 text-center">
+                        <h3 class="text-lg font-bold text-green-600">勝利条件</h3>
+                        <p class="text-slate-600 mt-2">16ターンの任期を無事に満了する。その時点での支持率が最終スコアとなります。</p>
+                    </div>
+                    <div class="border-2 border-red-500 rounded-lg p-4 text-center">
+                        <h3 class="text-lg font-bold text-red-600">敗北条件</h3>
+                        <p class="text-slate-600 mt-2">任期の途中で、国民支持率が <strong>20%未満</strong> になる。</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="text-center mt-12">
+            <a href="title.html" class="bg-slate-600 text-white font-bold py-3 px-8 rounded-lg shadow-md hover:bg-slate-500 transition-colors">
+                タイトルに戻る
+            </a>
+        </footer>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

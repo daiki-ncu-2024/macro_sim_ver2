@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>開発コラム - 財務省になろう！</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- KaTeX for LaTeX-style math rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU07RLA8HuZWTgdNEeVHs/nHiRj+bUYjaGlCUdEkAcwgpjkgg6RCBO#" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+        .katex-display {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 0.5rem 0;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+    <div class="max-w-3xl mx-auto p-4 md:p-8">
+        
+        <header class="text-center mb-10">
+            <h1 class="text-3xl font-bold text-blue-600">開発コラム</h1>
+            <p class="text-slate-500 mt-1">ゲームの背景にある経済モデルについて</p>
+        </header>
+
+        <main class="space-y-8">
+            <!-- 推定方法について -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-bold flex items-center mb-4">
+                    <i data-lucide="flask-conical" class="mr-3 text-slate-500"></i>
+                    推定方法について
+                </h2>
+                <div class="text-slate-600 leading-relaxed space-y-4">
+                    <p>
+                        このゲームに登場する数式は、実際の日本のマクロ経済データ（1994年〜2023年）を元に、計量経済学の手法を用いて推定されています。
+                    </p>
+                    <p>
+                        具体的には、消費関数や投資関数における変数間の複雑な関係性を考慮するため、<strong>二段階最小二乗法（2SLS）</strong> を用いて操作変数法による推定を行いました。
+                    </p>
+                    <p>
+                        また、各経済変数間の長期的な安定関係（<strong>共和分</strong>）の存在を検定した上で、短期的な変動と長期的な均衡への調整を同時に表現できる<strong>誤差修正モデル（ECM）</strong>を採用しています。これにより、プレイヤーの政策介入が短期的な効果だけでなく、長期的にどのような均衡状態に収束していくか、というダイナミクスをシミュレートしています。
+                    </p>
+                </div>
+            </div>
+
+            <!-- 主なマクロ経済理論 -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-bold flex items-center mb-4">
+                    <i data-lucide="scale" class="mr-3 text-slate-500"></i>
+                    主なマクロ経済理論
+                </h2>
+                <div class="text-slate-600 leading-relaxed space-y-4">
+                    <p>
+                        このゲームの経済モデルは、マクロ経済学の基本的な考え方である「国民所得恒等式」を基礎としています。これは、一国の経済活動の総量（GDP）が、消費、投資、政府支出の合計と等しいという関係を示します。
+                    </p>
+                    <div class="bg-slate-100 p-4 rounded-md text-center">
+                        $ Y = C + I + G $
+                    </div>
+                    <ul class="text-sm text-slate-500 mt-3 list-disc list-inside">
+                        <li>\(Y\): 実質GDP（生産物に対する総需要）</li>
+                        <li>\(C\): 実質個人消費</li>
+                        <li>\(I\): 実質民間投資</li>
+                        <li>\(G\): 実質政府支出</li>
+                    </ul>
+                    <p>
+                        プレイヤーは、政府支出 \(G\) や、消費 \(C\)・投資 \(I\) に影響を与える税率や金利を操作することで、この恒等式を通じて経済全体に介入します。
+                    </p>
+                </div>
+            </div>
+
+            <!-- データの出典について -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-bold flex items-center mb-4">
+                    <i data-lucide="database" class="mr-3 text-slate-500"></i>
+                    データの出典について
+                </h2>
+                <div class="text-slate-600 leading-relaxed space-y-4">
+                    <p>
+                        ゲーム内の経済モデルの推定には、以下の公的機関が公表している統計データを使用しています。
+                    </p>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>
+                            <strong>実質GDP・GDPデフレーター（物価）:</strong>
+                            <p>内閣府「国民経済計算（SNA）」より、四半期データを使用。GDPデフレーターは2020年を100として調整し、実質GDPを算出しています。</p>
+                            <ul class="list-disc list-inside ml-4 text-sm text-slate-500">
+                                <li><a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/sokuhou/files/2025/qe253_2/gdemenuja.html" target="_blank" class="text-blue-500 hover:underline">国民経済計算（GDP統計速報）</a></li>
+                                <li><a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/27kani_top.html" target="_blank" class="text-blue-500 hover:underline">国民経済計算（2015年基準改定）</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>金利（新発10年国債利回り）:</strong>
+                            <p>財務省「国債金利情報」より、新発10年国債利回りを使用しています。</p>
+                            <ul class="list-disc list-inside ml-4 text-sm text-slate-500">
+                                <li><a href="https://www.mof.go.jp/jgbs/reference/interest_rate/index.htm" target="_blank" class="text-blue-500 hover:underline">国債金利情報</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>税率:</strong>
+                            <p>財務省「税制の概要」等の資料を参考に、四半期データになるよう調整しています。</p>
+                            <ul class="list-disc list-inside ml-4 text-sm text-slate-500">
+                                <li><a href="https://www.mof.go.jp/tax_policy/summary/condition/a03.htm" target="_blank" class="text-blue-500 hover:underline">税制の概要</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 主要な数式 -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-bold flex items-center mb-6">
+                    <i data-lucide="function-square" class="mr-3 text-slate-500"></i>
+                    ゲームの主要な数式
+                </h2>
+                <div class="space-y-8">
+                    <div>
+                        <h3 class="text-lg font-bold border-b-2 border-blue-200 pb-2 mb-3">1. 物価（フィリップス曲線）</h3>
+                        <p class="text-slate-600 mb-4">物価の変動率（インフレ率）は、過去のインフレ率とGDPギャップ（需要の強さ）によって決まります。</p>
+                        <div class="bg-slate-100 p-4 rounded-md">$ \pi_t = -0.0010 + 0.3079 \cdot \pi_{t-1} + 0.0501 \cdot \text{gap}_{t-1} $</div>
+                        <ul class="text-sm text-slate-500 mt-3 list-disc list-inside">
+                            <li>\(\pi_t\): 今期のインフレ率</li>
+                            <li>\(\pi_{t-1}\): 前期のインフレ率</li>
+                            <li>\(\text{gap}_{t-1}\): 前期のGDPギャップ（実績GDP - 潜在GDP）</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold border-b-2 border-blue-200 pb-2 mb-3">2. 潜在GDP</h3>
+                        <p class="text-slate-600 mb-4">経済の基礎体力とも言える潜在GDPは、過去のトレンドと、前期の実際のGDP成長率に適応的に調整されます（指数平滑化）。</p>
+                        <div class="bg-slate-100 p-4 rounded-md">$ \ln Y^p_t = 0.85 \cdot \ln Y^p_{t-1} + 0.15 \cdot \ln Y_{t-1} $</div>
+                         <ul class="text-sm text-slate-500 mt-3 list-disc list-inside">
+                            <li>\(Y^p_t\): 今期の潜在GDP</li>
+                            <li>\(Y^p_{t-1}\): 前期の潜在GDP</li>
+                            <li>\(Y_{t-1}\): 前期の実績GDP</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold border-b-2 border-blue-200 pb-2 mb-3">3. 個人消費（誤差修正モデル）</h3>
+                        <p class="text-slate-600 mb-4">人々の消費は、可処分所得の短期的な変化と、長期的な均衡関係からのズレによって決まります。</p>
+                        <div class="bg-slate-100 p-4 rounded-md">$ \Delta \ln C_t \approx 0.8896 \cdot \Delta \ln Yd_t - 0.1589 \cdot (\ln C_{t-1} - \ln C^*_{t-1}) $</div>
+                         <ul class="text-sm text-slate-500 mt-3 list-disc list-inside">
+                            <li>\(\Delta \ln C_t\): 実質個人消費の変化率</li>
+                            <li>\(\Delta \ln Yd_t\): 実質可処分所得の変化率</li>
+                            <li>\((\ln C_{t-1} - \ln C^*_{t-1})\): 長期均衡からの乖離（誤差修正項）</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold border-b-2 border-blue-200 pb-2 mb-3">4. 民間投資（誤差修正モデル）</h3>
+                        <p class="text-slate-600 mb-4">企業の投資は、GDPや金利の短期的な変化と、長期的な均衡関係からのズレによって決まります。</p>
+                        <div class="bg-slate-100 p-4 rounded-md">$ \Delta \ln I_t \approx 0.9362 \cdot \Delta \ln Y_t - 0.1318 \cdot \Delta r_t - 0.0401 \cdot (\ln I_{t-1} - \ln I^*_{t-1}) $</div>
+                        <ul class="text-sm text-slate-500 mt-3 list-disc list-inside">
+                            <li>\(\Delta \ln I_t\): 実質民間投資の変化率</li>
+                            <li>\(\Delta \ln Y_t\): 実質GDPの変化率</li>
+                            <li>\(\Delta r_t\): 実質金利の変化</li>
+                            <li>\((\ln I_{t-1} - \ln I^*_{t-1})\): 長期均衡からの乖離（誤差修正項）</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="text-center mt-12">
+            <a href="title.html" class="bg-slate-600 text-white font-bold py-3 px-8 rounded-lg shadow-md hover:bg-slate-500 transition-colors">
+                タイトルに戻る
+            </a>
+        </footer>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false},
+                    {left: "\\(", right: "\\)", display: false},
+                    {left: "\\[", right: "\\]", display: true}
+                ]
+            });
+        });
+    </script>
+</body>
+</html>

@@ -119,12 +119,12 @@ const App = () => {
         
         const [newP, newInfl] = updatePrice(prev.P, gap, infl_prev);
         const growth = log(finalY / Y_prev);
-        const unemployment = prev.unemployment - 0.15 * (growth - 0.002);
+        const unemployment = prev.unemployment - 0.30 * (growth - 0);
         const newSupport = calcSupport(growth, newInfl, unemployment, prev.support);
 
         const newState = {
             ...current, date: `Turn ${prev.turn + 2}`, Y: finalY, C: finalC, I: finalI, G: G, P: newP, r: r, tau: tau,
-            unemployment: Math.max(0.01, unemployment), support: newSupport, turn: prev.turn + 1,
+            unemployment: Math.max(0.005, unemployment), support: newSupport, turn: prev.turn + 1,
             Y_potential: exp(new_log_Y_potential),
         };
 
@@ -180,7 +180,8 @@ const App = () => {
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                                     <XAxis dataKey="date" tick={{fontSize: 10}} />
                                     <YAxis yAxisId="left" orientation="left" stroke="#3b82f6" tick={{fontSize: 10}} domain={['dataMin - 10000', 'dataMax + 10000']} />
-                                    <YAxis yAxisId="right" orientation="right" stroke="#a855f7" tick={{fontSize: 10}} />
+                                    <YAxis yAxisId="right" orientation="right" stroke="#10b981" tick={{fontSize: 10}} domain={[0, 0.1]} /> {/* 失業率軸 */}
+                                    <YAxis yAxisId="right2" orientation="right" stroke="#a855f7" tick={{fontSize: 10}} domain={[90, 110]} offset={50} /> {/* 物価指数軸 */}
                                     <Tooltip formatter={(value, name) => {
                                         if (name === 'Y') return [`${(value / 1000).toFixed(1)} T`, '実質GDP'];
                                         if (name === 'unemployment') return [`${(value * 100).toFixed(2)} %`, '失業率'];
@@ -191,7 +192,7 @@ const App = () => {
                                     <defs><linearGradient id="colorY" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#3b82f6" stopOpacity={0.7}/><stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/></linearGradient></defs>
                                     <Area name="実質GDP" type="monotone" dataKey="Y" stroke="#3b82f6" fill="url(#colorY)" strokeWidth={2} yAxisId="left" />
                                     <Line name="失業率" type="monotone" dataKey="unemployment" stroke="#10b981" strokeWidth={2} yAxisId="right" dot={false} />
-                                    <Line name="物価指数" type="monotone" dataKey="P" stroke="#a855f7" strokeWidth={2} yAxisId="right" dot={false} />
+                                    <Line name="物価指数" type="monotone" dataKey="P" stroke="#a855f7" strokeWidth={2} yAxisId="right2" dot={false} />
                                 </ComposedChart>
                             </ResponsiveContainer>
                         </div>
