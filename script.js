@@ -6,6 +6,18 @@ const {
 // --- アイコン用コンポーネント ---
 const Icon = ({ name, className }) => {
     const iconData = window.lucide ? window.lucide.icons[name] : null;
+    
+    // Fallback for 'Menu' icon if lucide fails
+    if (name === 'Menu' && !iconData) {
+        return (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        );
+    }
+
     if (!iconData) return null;
     const renderNodes = (nodes) => {
         if (!Array.isArray(nodes)) return null;
@@ -56,9 +68,81 @@ const calcSupport = (growth, inflation, unemployment, prev_support) => {
     return Math.min(100, Math.max(0, new_support));
 };
 
-// --- New/Modified UI Components ---
+// --- UIコンポーネント ---
 
-// IndicatorCard component for GDP, Unemployment, Price
+const SideMenu = ({ isOpen, onClose, onReset }) => {
+    return (
+        <>
+            {/* Overlay */}
+            <div 
+                className={`fixed inset-0 bg-black/60 z-40 transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                onClick={onClose}
+            ></div>
+            {/* Menu Panel */}
+            <div className={`fixed top-0 left-0 h-full w-64 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                <div className="p-4">
+                    <h2 className="text-2xl font-black text-blue-600 mb-6 border-b-2 pb-2">メニュー</h2>
+                    <nav className="flex flex-col space-y-2">
+                        <a href="instructions.html" className="flex items-center p-3 rounded-lg hover:bg-slate-100 transition-colors">
+                            <Icon name="BookOpen" className="w-5 h-5 mr-3 text-slate-600" />
+                            <span className="font-bold text-slate-700">操作説明</span>
+                        </a>
+                        <a href="column.html" className="flex items-center p-3 rounded-lg hover:bg-slate-100 transition-colors">
+                            <Icon name="PenSquare" className="w-5 h-5 mr-3 text-slate-600" />
+                            <span className="font-bold text-slate-700">開発コラム</span>
+                        </a>
+                        <button onClick={onReset} className="flex items-center p-3 rounded-lg hover:bg-slate-100 transition-colors text-left w-full">
+                            <Icon name="RefreshCw" className="w-5 h-5 mr-3 text-slate-600" />
+                            <span className="font-bold text-slate-700">ゲームをリセット</span>
+                        </button>
+                        <a href="index.html" className="flex items-center p-3 rounded-lg hover:bg-slate-100 transition-colors">
+                            <Icon name="Home" className="w-5 h-5 mr-3 text-slate-600" />
+                            <span className="font-bold text-slate-700">タイトルに戻る</span>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </>
+    );
+};
+
+const CircularProgress = ({ percentage, size = 60, strokeWidth = 6 }) => {
+    const radius = (size - strokeWidth) / 2;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (percentage / 100) * circumference;
+
+    return (
+        <div className="relative" style={{ width: size, height: size }}>
+            <svg width={size} height={size} className="transform -rotate-90">
+                <circle
+                    cx={size / 2}
+                    cy={size / 2}
+                    r={radius}
+                    stroke="#e5e7eb"
+                    strokeWidth={strokeWidth}
+                    fill="transparent"
+                />
+                <circle
+                    cx={size / 2}
+                    cy={size / 2}
+                    r={radius}
+                    stroke="#ec4899"
+                    strokeWidth={strokeWidth}
+                    fill="transparent"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={offset}
+                    strokeLinecap="round"
+                    style={{ transition: 'stroke-dashoffset 0.5s ease-out' }}
+                />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-xl font-black text-pink-600">{percentage.toFixed(0)}</span>
+                <span className="text-[10px] font-bold text-pink-600 -mt-1">%</span>
+            </div>
+        </div>
+    );
+};
+
 const IndicatorCard = ({ label, value, change }) => {
     const changeColor = change > 0 ? "text-green-500" : change < 0 ? "text-red-500" : "text-slate-500";
     const changeIcon = change > 0 ? "▲" : change < 0 ? "▼" : "";
@@ -77,13 +161,12 @@ const IndicatorCard = ({ label, value, change }) => {
     );
 };
 
-// ControlGroup component (styling adjusted for thicker slider)
 const ControlGroup = ({ iconName, label, value, min, max, step, onChange, displayValue }) => (
     <div className="flex items-center gap-2">
         <Icon name={iconName} className="w-5 h-5 text-white" />
         <span className="text-xs font-bold uppercase text-white w-12 flex-shrink-0">{label}</span>
         <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(parseFloat(e.target.value))}
-            className="flex-1 h-3 bg-blue-900 rounded-lg appearance-none cursor-pointer accent-yellow-400 zero-point-slider" /> {/* h-3 for thicker */}
+            className="flex-1 h-3 bg-blue-900 rounded-lg appearance-none cursor-pointer accent-yellow-400 zero-point-slider" />
         <span className="text-yellow-300 font-bold w-20 text-right">{displayValue}</span>
     </div>
 );
@@ -93,15 +176,25 @@ const App = () => {
     const [controls, setControls] = useState({ tau: INITIAL_STATE.tau, rDelta: 0, gDelta: 0 });
     const [news, setNews] = useState(["次官、本日からよろしくお願いします！まずは予算教書を確認しましょう。"]);
     const [isGameOver, setIsGameOver] = useState(false);
-    const [activeChartTab, setActiveChartTab] = useState('GDP'); // New state for chart tab
+    const [activeChartTab, setActiveChartTab] = useState('GDP');
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const current = history[history.length - 1];
     const prev = history.length > 1 ? history[history.length - 2] : null;
 
-    // Calculate changes for indicators
     const gdpChange = prev ? ((current.Y - prev.Y) / prev.Y) * 100 : 0;
     const unemploymentChange = prev ? ((current.unemployment - prev.unemployment) / prev.unemployment) * 100 : 0;
     const priceChange = prev ? ((current.P - prev.P) / prev.P) * 100 : 0;
+
+    const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+    const handleReset = () => {
+        setHistory([INITIAL_STATE]);
+        setControls({ tau: INITIAL_STATE.tau, rDelta: 0, gDelta: 0 });
+        setNews(["ゲームをリセットしました。新たな気持ちで頑張りましょう！"]);
+        setIsGameOver(false);
+        setIsMenuOpen(false);
+    };
 
     const handleStep = () => {
         if (isGameOver) return;
@@ -155,12 +248,15 @@ const App = () => {
 
     return (
         <div className="bg-slate-100 text-slate-900 font-sans flex flex-col h-screen max-w-lg mx-auto">
-            {/* Header */}
-            <header className="flex items-center justify-between p-3 bg-white shadow-md">
-                <Icon name="Menu" className="w-6 h-6 text-slate-600" />
+            <SideMenu isOpen={isMenuOpen} onClose={toggleMenu} onReset={handleReset} />
+            
+            <header className="flex items-center justify-between p-3 bg-white shadow-md z-10">
+                <button onClick={toggleMenu} className="p-2 rounded-md bg-slate-100 hover:bg-slate-200 border border-slate-300 transition-colors">
+                    <Icon name="Menu" className="w-6 h-6 text-blue-600" />
+                </button>
                 <div className="flex flex-col items-center">
                     <div className="text-xs font-bold text-slate-400 uppercase">国民支持率</div>
-                    <div className="text-3xl font-black text-pink-600">{current.support.toFixed(1)}<span className="text-xl">%</span></div>
+                    <CircularProgress percentage={current.support} />
                 </div>
                 <div className="text-right">
                     <div className="text-xs font-bold text-slate-400">SESSION</div>
@@ -168,18 +264,14 @@ const App = () => {
                 </div>
             </header>
 
-            {/* Indicators */}
             <div className="flex justify-around gap-2 p-3 bg-slate-50 shadow-inner">
                 <IndicatorCard label="GDP" value={`${(current.Y / 1000).toFixed(1)}T`} change={gdpChange} />
                 <IndicatorCard label="失業率" value={`${(current.unemployment * 100).toFixed(2)}%`} change={unemploymentChange} />
                 <IndicatorCard label="物価" value={current.P.toFixed(1)} change={priceChange} />
             </div>
 
-            {/* Main Content Area (Chart + Character) */}
             <main className="flex-1 flex flex-col p-3 overflow-hidden">
-                {/* Chart */}
                 <div className="bg-white p-3 rounded-lg shadow-md flex-1 flex flex-col min-h-0">
-                    {/* Chart Tabs */}
                     <div className="flex justify-around border-b border-slate-200 mb-3">
                         {['GDP', '失業率', '物価'].map(tab => (
                             <button key={tab} onClick={() => setActiveChartTab(tab)}
@@ -193,18 +285,9 @@ const App = () => {
                             <ComposedChart data={history}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                                 <XAxis dataKey="date" tick={{fontSize: 10}} interval="preserveStartEnd" />
-                                {/* Y-axis for GDP */}
-                                {activeChartTab === 'GDP' && (
-                                    <YAxis yAxisId="left" orientation="left" stroke="#3b82f6" tick={{fontSize: 10}} domain={['dataMin - 10000', 'dataMax + 10000']} />
-                                )}
-                                {/* Y-axis for Unemployment */}
-                                {activeChartTab === '失業率' && (
-                                    <YAxis yAxisId="right" orientation="right" stroke="#10b981" tick={{fontSize: 10}} domain={[0, 0.1]} />
-                                )}
-                                {/* Y-axis for Price */}
-                                {activeChartTab === '物価' && (
-                                    <YAxis yAxisId="right2" orientation="right" stroke="#a855f7" tick={{fontSize: 10}} domain={[90, 110]} />
-                                )}
+                                {activeChartTab === 'GDP' && <YAxis yAxisId="left" orientation="left" stroke="#3b82f6" tick={{fontSize: 10}} domain={['dataMin - 10000', 'dataMax + 10000']} />}
+                                {activeChartTab === '失業率' && <YAxis yAxisId="right" orientation="right" stroke="#10b981" tick={{fontSize: 10}} domain={[0, 0.1]} />}
+                                {activeChartTab === '物価' && <YAxis yAxisId="right2" orientation="right" stroke="#a855f7" tick={{fontSize: 10}} domain={[90, 110]} />}
                                 <Tooltip formatter={(value, name) => {
                                     if (name === 'Y') return [`${(value / 1000).toFixed(1)} T`, '実質GDP'];
                                     if (name === 'unemployment') return [`${(value * 100).toFixed(2)} %`, '失業率'];
@@ -214,21 +297,14 @@ const App = () => {
                                 <Legend wrapperStyle={{fontSize: "10px"}} iconSize={10} />
                                 <defs><linearGradient id="colorY" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#3b82f6" stopOpacity={0.7}/><stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/></linearGradient></defs>
                                 
-                                {activeChartTab === 'GDP' && (
-                                    <Area name="実質GDP" type="monotone" dataKey="Y" stroke="#3b82f6" fill="url(#colorY)" strokeWidth={2} yAxisId="left" />
-                                )}
-                                {activeChartTab === '失業率' && (
-                                    <Line name="失業率" type="monotone" dataKey="unemployment" stroke="#10b981" strokeWidth={2} yAxisId="right" dot={false} />
-                                )}
-                                {activeChartTab === '物価' && (
-                                    <Line name="物価指数" type="monotone" dataKey="P" stroke="#a855f7" strokeWidth={2} yAxisId="right2" dot={false} />
-                                )}
+                                {activeChartTab === 'GDP' && <Area name="実質GDP" type="monotone" dataKey="Y" stroke="#3b82f6" fill="url(#colorY)" strokeWidth={2} yAxisId="left" />}
+                                {activeChartTab === '失業率' && <Line name="失業率" type="monotone" dataKey="unemployment" stroke="#10b981" strokeWidth={2} yAxisId="right" dot={false} />}
+                                {activeChartTab === '物価' && <Line name="物価指数" type="monotone" dataKey="P" stroke="#a855f7" strokeWidth={2} yAxisId="right2" dot={false} />}
                             </ComposedChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
 
-                {/* Character Area */}
                 <div className="flex items-end mt-4">
                     <img src="hakase1_smile.png" alt="補佐官ミライ" className="w-20 h-20 rounded-full border-2 border-blue-400 shadow-md flex-shrink-0" />
                     <div className="relative bg-blue-100 text-blue-800 p-3 rounded-lg rounded-bl-none shadow-md ml-3 flex-1">
@@ -238,7 +314,6 @@ const App = () => {
                 </div>
             </main>
 
-            {/* Controls */}
             <div className="bg-blue-700 text-white p-3 shadow-lg">
                 <div className="space-y-3">
                     <ControlGroup iconName="Scale" label="税率 (τ)" value={controls.tau} min={-0.25} max={0.25} step={0.005} displayValue={`${(controls.tau * 100).toFixed(1)}%`} onChange={(v) => setControls({...controls, tau: v})} />
@@ -247,10 +322,9 @@ const App = () => {
                 </div>
             </div>
 
-            {/* Footer (Next Quarter Button) */}
             <footer className="w-full">
                 <button onClick={handleStep} disabled={isGameOver}
-                    className="w-full bg-gradient-to-r from-blue-600 to-blue-800 text-white font-black py-4 text-xl shadow-lg transform active:scale-99 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                    className="w-full bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-black py-4 text-xl shadow-lg transition-transform duration-75 transform active:scale-95 active:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed">
                     次の四半期へ
                 </button>
             </footer>
@@ -275,4 +349,3 @@ const App = () => {
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);
-
