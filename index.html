@@ -3,34 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>財務省になろう！ 〜 補佐官ミライと描く日本の明日 〜</title>
-    
-    <!-- 1. 基本ライブラリの読み込み -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    
-    <!-- 2. Rechartsの動作に必要な依存関係の定義 -->
-    <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
-    <script>
-        // グローバルスコープの固定
-        window.React = React;
-        window.ReactDOM = ReactDOM;
-        window.PropTypes = PropTypes;
-    </script>
-
-    <!-- 3. グラフ・アイコン・スタイルの読み込み -->
-    <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <title>財務省になろう！</title>
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- 4. カスタムスタイルの読み込み -->
-    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;900&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+        .font-m-plus {
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+        }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-900">
-    <div id="root"></div>
+<body class="bg-slate-50 text-slate-800">
+    <div class="flex flex-col items-center justify-center min-h-screen text-center p-4">
+        
+        <!-- Title -->
+        <header class="mb-8">
+            <h1 class="font-m-plus font-black text-5xl md:text-6xl text-blue-600 tracking-tighter">財務省になろう！</h1>
+            <p class="mt-2 text-lg text-slate-600 font-bold">〜 補佐官ミライと描く日本の明日 〜</p>
+        </header>
 
-    <!-- 5. アプリケーションロジックの読み込み -->
-    <script type="text/babel" src="script.js"></script>
+        <!-- Central Graphic -->
+        <div class="my-8">
+            <svg width="150" height="100" viewBox="0 0 150 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="opacity-90">
+                <path d="M10 90 C 40 90, 60 20, 100 20 C 120 20, 130 50, 140 70" stroke="#4f46e5" stroke-width="8" stroke-linecap="round"/>
+                <path d="M125 70 L 140 70 L 132.5 85 Z" fill="#4f46e5"/>
+                <circle cx="10" cy="90" r="5" fill="#facc15" stroke="#f8fafc" stroke-width="2"/>
+                <circle cx="100" cy="20" r="5" fill="#facc15" stroke="#f8fafc" stroke-width="2"/>
+            </svg>
+        </div>
+
+        <!-- Buttons -->
+        <nav class="flex flex-col space-y-4 w-full max-w-xs">
+            <a href="game.html" class="group flex items-center justify-center w-full bg-blue-600 text-white font-bold py-4 px-6 rounded-lg text-xl shadow-lg hover:bg-blue-500 transition-transform transform hover:scale-105">
+                <i data-lucide="play-circle" class="mr-3"></i>
+                ゲーム開始
+            </a>
+            <a href="instructions.html" class="group flex items-center justify-center w-full bg-white text-slate-700 border border-slate-300 font-bold py-3 px-6 rounded-lg text-lg shadow-md hover:bg-slate-100 transition-transform transform hover:scale-105">
+                <i data-lucide="book-open" class="mr-3"></i>
+                操作説明
+            </a>
+            <a href="column.html" class="group flex items-center justify-center w-full text-slate-500 font-bold py-2 px-6 rounded-lg text-sm hover:bg-slate-200 transition-colors">
+                <i data-lucide="pen-square" class="mr-2 w-4 h-4"></i>
+                開発コラム
+            </a>
+        </nav>
+
+        <footer class="absolute bottom-4 text-xs text-slate-400">
+            <p>&copy; 2024 daiki-ncu-2024</p>
+        </footer>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
 </body>
 </html>
