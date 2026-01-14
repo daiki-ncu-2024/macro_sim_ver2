@@ -10,10 +10,10 @@ const Icon = ({ name, className }) => {
     // Fallback for 'Menu' icon if lucide fails
     if (name === 'Menu' && !iconData) {
         return (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-                <line x1="3" y1="12" x2="21" y2="12"></line>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <line x1="3" y1="18" x2="21" y2="18"></line>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <line x1="3" y1="12" x2="21" y2="12" stroke="#2563eb"></line>
+                <line x1="3" y1="6" x2="21" y2="6" stroke="#2563eb"></line>
+                <line x1="3" y1="18" x2="21" y2="18" stroke="#2563eb"></line>
             </svg>
         );
     }
@@ -260,7 +260,53 @@ const ControlGroup = ({ iconName, label, value, min, max, step, onChange, displa
     </div>
 );
 
+const GameSetupScreen = ({ onStartGame }) => {
+    const [selectedLimit, setSelectedLimit] = useState(16);
+
+    const options = [
+        { label: '短期政権', turns: 4, years: '1年' },
+        { label: '中期政権', turns: 8, years: '2年' },
+        { label: '長期政権', turns: 16, years: '4年' },
+    ];
+
+    return (
+        <div className="bg-slate-100 flex flex-col h-screen max-w-lg mx-auto items-center justify-center p-4">
+            <div className="bg-white p-8 rounded-2xl shadow-2xl w-full text-center">
+                <h1 className="text-2xl font-black text-blue-600 mb-2">政権運営期間の選択</h1>
+                <p className="text-slate-500 mb-6">何年間の政権運営に挑戦しますか？</p>
+                
+                <div className="space-y-3 mb-8">
+                    {options.map(opt => (
+                        <button 
+                            key={opt.turns}
+                            onClick={() => setSelectedLimit(opt.turns)}
+                            className={`w-full p-4 rounded-lg border-4 transition-all text-left ${selectedLimit === opt.turns ? 'border-blue-500 bg-blue-50' : 'border-transparent bg-slate-100 hover:bg-slate-200'}`}
+                        >
+                            <div className="flex justify-between items-center">
+                                <span className="font-bold text-lg text-slate-800">{opt.label}</span>
+                                <span className="font-black text-xl text-blue-600">{opt.years}</span>
+                            </div>
+                        </button>
+                    ))}
+                </div>
+
+                <button 
+                    onClick={() => onStartGame(selectedLimit)}
+                    className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-lg shadow-lg text-xl transition-transform transform active:scale-95"
+                >
+                    ゲーム開始
+                </button>
+                <a href="index.html" className="block text-center mt-4 text-sm text-slate-500 hover:text-slate-700 hover:underline">
+                    タイトルに戻る
+                </a>
+            </div>
+        </div>
+    );
+};
+
 const App = () => {
+    const [isGameStarted, setIsGameStarted] = useState(false);
+    const [termLimit, setTermLimit] = useState(16);
     const [history, setHistory] = useState([INITIAL_STATE]);
     const [controls, setControls] = useState({ tau: INITIAL_STATE.tau, rDelta: 0, gDelta: 0 });
     const [news, setNews] = useState(["次官、本日からよろしくお願いします！まずは予算教書を確認しましょう。"]);
@@ -282,11 +328,12 @@ const App = () => {
     const handleReset = () => {
         setHistory([INITIAL_STATE]);
         setControls({ tau: INITIAL_STATE.tau, rDelta: 0, gDelta: 0 });
-        setNews(["ゲームをリセットしました。新たな気持ちで頑張りましょう！"]);
+        setNews(["次官、本日からよろしくお願いします！まずは予算教書を確認しましょう。"]);
         setIsGameOver(false);
         setGameOverReason(null);
         setIsMenuOpen(false);
         setFeedbackData(null);
+        setIsGameStarted(false); // Go back to setup screen
     };
 
     const handleStep = () => {
@@ -339,7 +386,7 @@ const App = () => {
         setHistory([...history, newState]);
         setNews([commentary, ...news.slice(0, 4)]);
 
-        if (newState.turn >= 16) {
+        if (newState.turn >= termLimit) {
             setIsGameOver(true);
             setGameOverReason('term_end');
         } else if (newState.support < 20) {
@@ -357,6 +404,15 @@ const App = () => {
         }
     };
 
+    const handleGameStart = (limit) => {
+        setTermLimit(limit);
+        setIsGameStarted(true);
+    };
+
+    if (!isGameStarted) {
+        return <GameSetupScreen onStartGame={handleGameStart} />;
+    }
+
     return (
         <div className="bg-slate-100 text-slate-900 font-sans flex flex-col h-screen max-w-lg mx-auto">
             <FeedbackModal data={feedbackData} onClose={() => setFeedbackData(null)} />
@@ -372,7 +428,7 @@ const App = () => {
                 </div>
                 <div className="text-right">
                     <div className="text-xs font-bold text-slate-400">SESSION</div>
-                    <div className="text-xl font-black text-blue-600">{current.turn}/16</div>
+                    <div className="text-xl font-black text-blue-600">{current.turn}/{termLimit}</div>
                 </div>
             </header>
 
