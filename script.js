@@ -300,18 +300,20 @@ const App = () => {
         setHistory([...history, newState]);
         setNews([commentary, ...news.slice(0, 4)]);
 
-        if (prev.turn === 0) {
+        const gameWillBeOver = newState.support < 20 || newState.turn >= 16;
+
+        if (gameWillBeOver) {
+            setIsGameOver(true);
+        } else {
             const feedback = {
-                gdpChange: ((finalY - Y_prev) / Y_prev) * 100,
-                unemploymentChange: ((unemployment - prev.unemployment) / (prev.unemployment || 1)) * 100,
-                priceChange: ((newP - prev.P) / prev.P) * 100,
+                gdpChange: ((newState.Y - prev.Y) / prev.Y) * 100,
+                unemploymentChange: ((newState.unemployment - prev.unemployment) / (prev.unemployment || 1)) * 100,
+                priceChange: ((newState.P - prev.P) / prev.P) * 100,
                 commentary: commentary,
-                turn: prev.turn + 1
+                turn: newState.turn
             };
             setFeedbackData(feedback);
         }
-
-        if (newSupport < 20 || newState.turn >= 16) setIsGameOver(true);
     };
 
     return (
