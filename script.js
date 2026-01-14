@@ -70,6 +70,58 @@ const calcSupport = (growth, inflation, unemployment, prev_support) => {
 
 // --- UIコンポーネント ---
 
+const FeedbackModal = ({ data, onClose }) => {
+    if (!data) return null;
+
+    const { gdpChange, unemploymentChange, priceChange, commentary, turn } = data;
+
+    const formatChange = (change) => {
+        const changeColor = change > 0 ? "text-green-500" : change < 0 ? "text-red-500" : "text-slate-500";
+        const changeIcon = change > 0 ? "▲" : change < 0 ? "▼" : "";
+        return (
+            <span className={`text-lg font-bold ${changeColor}`}>
+                {changeIcon}{Math.abs(change).toFixed(1)}%
+            </span>
+        );
+    };
+
+    return (
+        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white p-6 rounded-2xl max-w-sm w-full shadow-2xl border-4 border-blue-400">
+                <h2 className="text-xl font-black mb-2 text-slate-800">第{turn}四半期 結果報告</h2>
+                <p className="text-slate-500 mb-4 font-semibold">政策の結果、経済指標は以下のように変動しました。</p>
+                
+                <div className="space-y-3 mb-4">
+                    <div className="flex justify-between items-center bg-slate-100 p-3 rounded-lg">
+                        <span className="font-bold text-slate-600">GDP成長率</span>
+                        {formatChange(gdpChange)}
+                    </div>
+                    <div className="flex justify-between items-center bg-slate-100 p-3 rounded-lg">
+                        <span className="font-bold text-slate-600">失業率</span>
+                        {formatChange(unemploymentChange)}
+                    </div>
+                    <div className="flex justify-between items-center bg-slate-100 p-3 rounded-lg">
+                        <span className="font-bold text-slate-600">物価上昇率</span>
+                        {formatChange(priceChange)}
+                    </div>
+                </div>
+
+                <div className="flex items-start mt-4 mb-4">
+                    <img src="hakase1_smile.png" alt="補佐官ミライ" className="w-16 h-16 rounded-full border-2 border-blue-400 shadow-md flex-shrink-0" />
+                    <div className="relative bg-blue-100 text-blue-800 p-3 rounded-lg rounded-bl-none shadow-md ml-3 flex-1">
+                        <p className="text-sm font-semibold">{commentary}</p>
+                        <div className="absolute left-0 bottom-0 w-3 h-3 bg-blue-100 transform rotate-45 translate-x-1/2 translate-y-1/2"></div>
+                    </div>
+                </div>
+
+                <button onClick={onClose} className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg shadow-lg transition-all">
+                    確認して次へ
+                </button>
+            </div>
+        </div>
+    );
+};
+
 const SideMenu = ({ isOpen, onClose, onReset }) => {
     return (
         <>
@@ -178,6 +230,7 @@ const App = () => {
     const [isGameOver, setIsGameOver] = useState(false);
     const [activeChartTab, setActiveChartTab] = useState('GDP');
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [feedbackData, setFeedbackData] = useState(null);
 
     const current = history[history.length - 1];
     const prev = history.length > 1 ? history[history.length - 2] : null;
@@ -194,6 +247,7 @@ const App = () => {
         setNews(["ゲームをリセットしました。新たな気持ちで頑張りましょう！"]);
         setIsGameOver(false);
         setIsMenuOpen(false);
+        setFeedbackData(null);
     };
 
     const handleStep = () => {
@@ -240,14 +294,29 @@ const App = () => {
             if (newSupport < 35) return "国民の不満が高まっています。慎重な政策運営を。";
             return "順調な四半期でした。次の方針を決定してください。";
         };
+        
+        const commentary = getCommentary();
 
         setHistory([...history, newState]);
-        setNews([getCommentary(), ...news.slice(0, 4)]);
+        setNews([commentary, ...news.slice(0, 4)]);
+
+        if (prev.turn === 0) {
+            const feedback = {
+                gdpChange: ((finalY - Y_prev) / Y_prev) * 100,
+                unemploymentChange: ((unemployment - prev.unemployment) / (prev.unemployment || 1)) * 100,
+                priceChange: ((newP - prev.P) / prev.P) * 100,
+                commentary: commentary,
+                turn: prev.turn + 1
+            };
+            setFeedbackData(feedback);
+        }
+
         if (newSupport < 20 || newState.turn >= 16) setIsGameOver(true);
     };
 
     return (
         <div className="bg-slate-100 text-slate-900 font-sans flex flex-col h-screen max-w-lg mx-auto">
+            <FeedbackModal data={feedbackData} onClose={() => setFeedbackData(null)} />
             <SideMenu isOpen={isMenuOpen} onClose={toggleMenu} onReset={handleReset} />
             
             <header className="flex items-center justify-between p-3 bg-white shadow-md z-10">
