@@ -37,7 +37,7 @@ const Icon = ({ name, className }) => {
 const INITIAL_STATE = {
     date: '2024 Q2',
     Y: 586251.3, C: 305069.6, I: 127838.6, G: 149000.0, P: 100.2, r: -1.679,
-    tau: 0.1186, unemployment: 0.025, support: 50.0, turn: 0, Y_potential: 586251.3,
+    tau: 0, unemployment: 0.025, support: 50.0, turn: 0, Y_potential: 586251.3,
 };
 
 // --- ロジック関数 ---
@@ -66,6 +66,43 @@ const calcSupport = (growth, inflation, unemployment, prev_support) => {
     const u_penalty = Math.max(0, unemployment - 0.025) * 18000.0;
     const new_support = prev_support + (bonus - p_penalty - u_penalty) / 100;
     return Math.min(100, Math.max(0, new_support));
+};
+
+const getFinalRank = (finalState, initialState) => {
+    const growth = (finalState.Y / initialState.Y) - 1;
+    const unemployment = finalState.unemployment;
+    const inflation = (finalState.P / initialState.P) - 1;
+    const support = finalState.support;
+
+    if (support > 75 && growth > 0.08 && unemployment < 0.028) {
+        return { title: "黄金時代の立役者", description: "高い支持率、高い成長、低い失業率。歴史に残る名宰相です！" };
+    }
+    if (growth > 0.12) {
+        return { title: "高度成長の旗手", description: "経済成長を最優先し、見事な結果を残しました。" };
+    }
+    if (inflation < 0.02 && inflation > -0.02 && support > 60) {
+        return { title: "安定の調整役", description: "経済を巧みに安定させ、国民の信頼を得ました。" };
+    }
+    if (inflation > 0.1) {
+        return { title: "インフレ・ファイター", description: "物価高との戦いに追われた任期でした。"};
+    }
+    if (unemployment > 0.04) {
+        return { title: "失業なき社会へ", description: "雇用の創出が最大の課題となった任期でした。"};
+    }
+    if (support < 35) {
+        return { title: "嵐の中の船出", description: "国民の厳しい視線の中、困難な舵取りを迫られました。"};
+    }
+    return { title: "堅実な政策家", description: "大きな波乱なく、安定した政策運営を行いました。" };
+};
+
+const getFinalLetterRank = (support, reason) => {
+    if (reason === 'dissolution') return 'F';
+    if (support >= 90) return 'S';
+    if (support >= 80) return 'A';
+    if (support >= 60) return 'B';
+    if (support >= 40) return 'C';
+    if (support >= 20) return 'D';
+    return 'E';
 };
 
 // --- UIコンポーネント ---
@@ -228,6 +265,7 @@ const App = () => {
     const [controls, setControls] = useState({ tau: INITIAL_STATE.tau, rDelta: 0, gDelta: 0 });
     const [news, setNews] = useState(["次官、本日からよろしくお願いします！まずは予算教書を確認しましょう。"]);
     const [isGameOver, setIsGameOver] = useState(false);
+    const [gameOverReason, setGameOverReason] = useState(null); // 'term_end' or 'dissolution'
     const [activeChartTab, setActiveChartTab] = useState('GDP');
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [feedbackData, setFeedbackData] = useState(null);
@@ -246,6 +284,7 @@ const App = () => {
         setControls({ tau: INITIAL_STATE.tau, rDelta: 0, gDelta: 0 });
         setNews(["ゲームをリセットしました。新たな気持ちで頑張りましょう！"]);
         setIsGameOver(false);
+        setGameOverReason(null);
         setIsMenuOpen(false);
         setFeedbackData(null);
     };
@@ -300,10 +339,12 @@ const App = () => {
         setHistory([...history, newState]);
         setNews([commentary, ...news.slice(0, 4)]);
 
-        const gameWillBeOver = newState.support < 20 || newState.turn >= 16;
-
-        if (gameWillBeOver) {
+        if (newState.turn >= 16) {
             setIsGameOver(true);
+            setGameOverReason('term_end');
+        } else if (newState.support < 20) {
+            setIsGameOver(true);
+            setGameOverReason('dissolution');
         } else {
             const feedback = {
                 gdpChange: ((newState.Y - prev.Y) / prev.Y) * 100,
@@ -400,20 +441,104 @@ const App = () => {
                 </button>
             </footer>
 
-            {isGameOver && (
-                <div className="fixed inset-0 bg-blue-900/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white p-6 rounded-2xl max-w-sm w-full shadow-2xl text-center border-4 border-yellow-400">
-                        <div className="text-5xl mb-2">🏆</div>
-                        <h2 className="text-2xl font-black mb-1 text-slate-800">任期満了！</h2>
-                        <p className="text-slate-500 mb-4 font-semibold">お疲れ様でした。あなたの政策結果です。</p>
-                        <div className="bg-slate-100 p-3 rounded-lg mb-4">
-                            <div className="text-sm font-bold text-slate-400">最終支持率</div>
-                            <div className="text-4xl font-black text-blue-600">{current.support.toFixed(1)}%</div>
+            {isGameOver && (() => {
+                const letterRank = getFinalLetterRank(current.support, gameOverReason);
+
+                if (gameOverReason === 'term_end') {
+                    const finalRank = getFinalRank(current, history[0]);
+                    return (
+                        <div className="fixed inset-0 bg-blue-900/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                            <div className="bg-white p-6 rounded-2xl max-w-sm w-full shadow-2xl text-center border-4 border-yellow-400">
+                                <div className="text-5xl mb-2">🏆</div>
+                                <h2 className="text-2xl font-black mb-1 text-slate-800">任期満了！</h2>
+                                <p className="text-slate-500 mb-4 font-semibold">お疲れ様でした。あなたの政策結果です。</p>
+                                
+                                <div className="bg-yellow-50 p-3 rounded-lg mb-4 border border-yellow-200">
+                                    <div className="text-sm font-bold text-yellow-600">総合ランク</div>
+                                    <div className="text-6xl font-black text-yellow-700">{letterRank}</div>
+                                </div>
+
+                                <div className="bg-blue-50 p-3 rounded-lg mb-4 border border-blue-200">
+                                    <div className="text-sm font-bold text-blue-500">最終支持率</div>
+                                    <div className="text-4xl font-black text-blue-600">{current.support.toFixed(1)}%</div>
+                                </div>
+
+                                <div className="bg-slate-100 p-3 rounded-lg mb-4 text-left">
+                                    <h3 className="text-sm font-bold text-slate-500 mb-2 text-center">最終経済状況</h3>
+                                    <div className="flex justify-around">
+                                        <div className="text-center">
+                                            <div className="text-xs text-slate-500">実質GDP</div>
+                                            <div className="font-bold text-slate-800">{(current.Y / 1000).toFixed(1)}T</div>
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="text-xs text-slate-500">失業率</div>
+                                            <div className="font-bold text-slate-800">{(current.unemployment * 100).toFixed(2)}%</div>
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="text-xs text-slate-500">物価指数</div>
+                                            <div className="font-bold text-slate-800">{current.P.toFixed(1)}</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-yellow-100 p-3 rounded-lg mb-4 border border-yellow-300">
+                                    <h3 className="text-lg font-bold text-yellow-800">{finalRank.title}</h3>
+                                    <p className="text-sm text-yellow-700 mt-1">{finalRank.description}</p>
+                                </div>
+
+                                <button onClick={() => window.location.reload()} className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg shadow-lg transition-all">もう一度挑戦する</button>
+                            </div>
                         </div>
-                        <button onClick={() => window.location.reload()} className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg shadow-lg transition-all">もう一度挑戦する</button>
-                    </div>
-                </div>
-            )}
+                    );
+                } else if (gameOverReason === 'dissolution') {
+                    const finalRank = getFinalRank(current, history[0]);
+                    return (
+                        <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                            <div className="bg-white p-6 rounded-2xl max-w-sm w-full shadow-2xl text-center border-4 border-red-400">
+                                <div className="text-5xl mb-2">📉</div>
+                                <h2 className="text-2xl font-black mb-1 text-red-800">内閣総辞職</h2>
+                                <p className="text-slate-500 mb-4 font-semibold">国民の支持を失い、内閣は総辞職を余儀なくされました。</p>
+                                
+                                <div className="bg-red-50 p-3 rounded-lg mb-4 border border-red-200">
+                                    <div className="text-sm font-bold text-red-600">総合ランク</div>
+                                    <div className="text-6xl font-black text-red-700">{letterRank}</div>
+                                </div>
+                                
+                                <div className="bg-red-50 p-3 rounded-lg mb-4 border border-red-200">
+                                    <div className="text-sm font-bold text-red-500">最終支持率</div>
+                                    <div className="text-4xl font-black text-red-600">{current.support.toFixed(1)}%</div>
+                                </div>
+
+                                <div className="bg-slate-100 p-3 rounded-lg mb-4 text-left">
+                                    <h3 className="text-sm font-bold text-slate-500 mb-2 text-center">最終経済状況</h3>
+                                    <div className="flex justify-around">
+                                        <div className="text-center">
+                                            <div className="text-xs text-slate-500">実質GDP</div>
+                                            <div className="font-bold text-slate-800">{(current.Y / 1000).toFixed(1)}T</div>
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="text-xs text-slate-500">失業率</div>
+                                            <div className="font-bold text-slate-800">{(current.unemployment * 100).toFixed(2)}%</div>
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="text-xs text-slate-500">物価指数</div>
+                                            <div className="font-bold text-slate-800">{current.P.toFixed(1)}</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-red-50 p-3 rounded-lg mb-4 border border-red-200">
+                                    <h3 className="text-lg font-bold text-red-800">{finalRank.title}</h3>
+                                    <p className="text-sm text-red-700 mt-1">{finalRank.description}</p>
+                                </div>
+
+                                <button onClick={() => window.location.reload()} className="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-lg shadow-lg transition-all">再挑戦する</button>
+                            </div>
+                        </div>
+                    );
+                }
+                return null;
+            })()}
         </div>
     );
 };
