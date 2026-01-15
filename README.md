@@ -8,17 +8,22 @@
 
 ## 主な使用技術
 
-このアプリケーションは、以下の技術で構築されています。
+このアプリケーションは、特定のサーバーサイド技術（バックエンド）を持たない静的なウェブアプリケーションとして構築されています。すべての計算と表示はユーザーのブラウザ内で完結します。
 
-*   **HTML5**
-*   **CSS3**
-    *   [Tailwind CSS](https://tailwindcss.com/): UIのスタイリングに使用しています。
-*   **JavaScript (ES6+)**
-*   **UIライブラリ**
-    *   [React](https://react.dev/): ゲーム画面のUI構築に利用しています（CDN経由）。
-    *   [Recharts](https://recharts.org/): 経済指標のグラフ表示に利用しています（CDN経由）。
-    *   [Lucide Icons](https://lucide.dev/): アイコン表示に利用しています（CDN経由）。
-    *   [KaTeX](https://katex.org/): 開発コラムページの数式表示に利用しています（CDN経由）。
+*   **基本技術:** HTML, CSS, JavaScript
+*   **CSSフレームワーク:** [Tailwind CSS](https://tailwindcss.com/)
+*   **JavaScriptライブラリ:**
+    *   [React](https://react.dev/): ゲーム画面のUI構築 (CDN経由)
+    *   [Recharts](https://recharts.org/) / [Chart.js](https://www.chartjs.org/): 経済指標のグラフ描画
+    *   [Lucide Icons](https://lucide.dev/): アイコン表示
+    *   [KaTeX](https://katex.org/): 開発コラムページの数式表示
+*   **バージョン管理:** Git
+
+## データ出典
+
+ゲームの経済モデルの推定に使用したデータセットや、加工のためのプログラムは以下のリポジトリで公開しています。
+
+*   [https://github.com/daiki-ncu-2024/macro_sim](https://github.com/daiki-ncu-2024/macro_sim)
 
 ## 実行方法
 
