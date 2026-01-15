@@ -25,6 +25,11 @@
 
 *   [https://github.com/daiki-ncu-2024/macro_sim](https://github.com/daiki-ncu-2024/macro_sim)
 
+## 開発者
+
+*   **氏名:** 山口大輝
+*   **ポートフォリオサイト:** [https://daiki-ncu-2024.github.io/daiki-ncu-2025.github.io/index.html](https://daiki-ncu-2024.github.io/daiki-ncu-2025.github.io/index.html)
+
 ## 実行方法
 
 このアプリケーションはサーバーを必要としないため、ローカル環境で簡単に実行できます。
